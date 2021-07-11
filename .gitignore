@@ -1,4 +1,14 @@
-node_modules/
-dist/
-package-lock.json
+# dependencies
+/node_modules
+
+# production
+/build
+
+# testing
+/coverage
+
+# bundle-analyzer
 stats.json
+
+# misc
+.env

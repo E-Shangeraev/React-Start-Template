@@ -13,7 +13,10 @@ const isProd = !isDev;
 const filename = (ext) => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`);
 
 const cssLoaders = (extra) => {
-  let loaders = [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader'];
+  let loaders = [
+    isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+    'css-loader',
+  ];
 
   if (extra) {
     loaders.push(extra);
@@ -35,7 +38,27 @@ const plugins = () => {
       patterns: [
         {
           from: path.resolve(__dirname, 'public/favicon.ico'),
-          to: path.resolve(__dirname, 'dist'),
+          to: path.resolve(__dirname, 'build'),
+        },
+        {
+          from: path.resolve(__dirname, 'public/manifest.json'),
+          to: path.resolve(__dirname, 'build'),
+        },
+        {
+          from: path.resolve(__dirname, 'public/serviceWorker.js'),
+          to: path.resolve(__dirname, 'build'),
+        },
+        {
+          from: path.resolve(__dirname, 'public/logo192.png'),
+          to: path.resolve(__dirname, 'build'),
+        },
+        {
+          from: path.resolve(__dirname, 'public/logo512.png'),
+          to: path.resolve(__dirname, 'build'),
+        },
+        {
+          from: path.resolve(__dirname, 'public/robots.txt'),
+          to: path.resolve(__dirname, 'build'),
         },
       ],
     }),
@@ -54,7 +77,10 @@ const plugins = () => {
 const babelOptions = (preset) => {
   let opts = {
     presets: ['@babel/preset-env'],
-    plugins: ['@babel/plugin-proposal-class-properties'],
+    plugins: [
+      '@babel/plugin-syntax-dynamic-import',
+      '@babel/plugin-proposal-class-properties',
+    ],
   };
   if (preset) {
     opts.presets.push(preset);
@@ -82,17 +108,18 @@ module.exports = {
   mode: 'development',
   entry: {
     main: ['@babel/polyfill', './index.jsx'],
-    // analytics: './analytics.js',
   },
   output: {
     filename: filename('js'),
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'build'),
+    // publicPath: getPublicUrlOrPath(),
   },
   resolve: {
-    extensions: ['.js', '.ts', '.json'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
-      '@public': path.resolve(__dirname, 'public'),
-      '@models': path.resolve(__dirname, 'src/models'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@assets': path.resolve(__dirname, 'src/assets'),
+      '@scss': path.resolve(__dirname, 'src/scss'),
       '@': path.resolve(__dirname, 'src'),
     },
   },
@@ -109,7 +136,7 @@ module.exports = {
     ],
   },
   devServer: {
-    contentBase: path.resolve(__dirname, 'dist'),
+    contentBase: path.resolve(__dirname, 'build'),
     port: 3000,
     hot: isDev,
   },

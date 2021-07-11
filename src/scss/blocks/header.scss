@@ -1,0 +1,22 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: $header-height;
+  padding: 0 10vw;
+  background-color: #0dbadb;
+  box-shadow: 0 3px 5px #aaa;
+}
+.header__nav {
+  width: 100%;
+
+  ul {
+    display: flex;
+    justify-content: space-between;
+  }
+  li {
+    font-size: 16px;
+    line-height: 150%;
+  }
+}
