@@ -1,8 +1,6 @@
 import React from 'react';
 import Button from './components/Button/Button';
 
-import noImage from '@assets/img/no-image.jpg';
-
 const App = () => {
   return (
     <div className="App">

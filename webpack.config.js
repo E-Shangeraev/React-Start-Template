@@ -37,28 +37,12 @@ const plugins = () => {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, 'public/favicon.ico'),
+          from: path.resolve(__dirname, 'public'),
           to: path.resolve(__dirname, 'build'),
-        },
-        {
-          from: path.resolve(__dirname, 'public/manifest.json'),
-          to: path.resolve(__dirname, 'build'),
-        },
-        {
-          from: path.resolve(__dirname, 'public/serviceWorker.js'),
-          to: path.resolve(__dirname, 'build'),
-        },
-        {
-          from: path.resolve(__dirname, 'public/logo192.png'),
-          to: path.resolve(__dirname, 'build'),
-        },
-        {
-          from: path.resolve(__dirname, 'public/logo512.png'),
-          to: path.resolve(__dirname, 'build'),
-        },
-        {
-          from: path.resolve(__dirname, 'public/robots.txt'),
-          to: path.resolve(__dirname, 'build'),
+          noErrorOnMissing: true,
+          globOptions: {
+            ignore: ['**/index.html'],
+          },
         },
       ],
     }),
@@ -67,9 +51,9 @@ const plugins = () => {
     }),
   ];
 
-  if (isProd) {
-    base.push(new BundleAnalyzerPlugin());
-  }
+  // if (isProd) {
+  //   base.push(new BundleAnalyzerPlugin());
+  // }
 
   return base;
 };
@@ -112,7 +96,6 @@ module.exports = {
   output: {
     filename: filename('js'),
     path: path.resolve(__dirname, 'build'),
-    // publicPath: getPublicUrlOrPath(),
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
