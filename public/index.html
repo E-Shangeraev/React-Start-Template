@@ -3,7 +3,6 @@
   <meta>
     <meta charset="utf-8" />
     <link rel="icon" type="image/x-icon" href="./favicon.ico" />
-    <link rel="preload" href="../src/assets/fonts/IgraSans.woff" as="font" crossorigin="anonymous" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="description" content="React Start Template can be useful for web application development" />
@@ -19,11 +18,11 @@
         window.addEventListener('load', async () => {
           try {
             const info = await navigator.serviceWorker.register(
-              './serviceWorker.js',
+              './service-worker.js',
             );
             console.log('Service worker register success', info.scope);
           } catch (error) {
-            console.log('Service worker register fail', error);
+            console.log('Service worker registration failed', error);
           }
         });
       } else {

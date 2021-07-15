@@ -1,18 +1,14 @@
-import React from 'react';
-import Button from './components/Button/Button';
+import React, { Suspense } from 'react'
+import Header from '@components/Header/Header'
+const Footer = React.lazy(() => import('@components/Footer/Footer'))
+import Button from './components/Button/Button'
+import jpeg from '@assets/img/map.jpg'
+import svg from '@assets/svg/inst.svg'
 
 const App = () => {
   return (
     <div className="App">
-      <header className="header">
-        <nav className="header__nav">
-          <ul>
-            <li>1</li>
-            <li>2</li>
-            <li>3</li>
-          </ul>
-        </nav>
-      </header>
+      <Header />
       <main>
         <section className="promo">
           <div className="wrapper">
@@ -20,20 +16,15 @@ const App = () => {
               <h1>This is React-Start-Template</h1>
               <Button outlined>Button</Button>
             </div>
+            <img src={jpeg} alt="jpeg" loading="lazy" />
           </div>
         </section>
       </main>
-      <footer className="footer">
-        <nav className="footer__nav">
-          <ul>
-            <li>1</li>
-            <li>2</li>
-            <li>3</li>
-          </ul>
-        </nav>
-      </footer>
+      <Suspense fallback={<div />}>
+        <Footer />
+      </Suspense>
     </div>
-  );
-};
+  )
+}
 
-export default App;
+export default App

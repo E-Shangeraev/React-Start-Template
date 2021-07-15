@@ -1,37 +1,92 @@
-const path = require('path');
-const HTMLWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const path = require('path')
+const HTMLWebpackPlugin = require('html-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const FontPreloadPlugin = require('webpack-font-preload-plugin')
+const WorkboxPlugin = require('workbox-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
+const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin')
+const { extendDefaultPlugins } = require('svgo')
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 
-const isDev = process.env.NODE_ENV === 'development';
-const isProd = !isDev;
+const isDev = process.env.NODE_ENV === 'development'
+const isProd = !isDev
 
-const filename = (ext) => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`);
+const filename = ext => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`)
 
-const cssLoaders = (extra) => {
+const cssLoaders = extra => {
   let loaders = [
     isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
     'css-loader',
-  ];
+  ]
 
   if (extra) {
-    loaders.push(extra);
+    loaders.push(extra)
   }
 
-  return loaders;
-};
+  return loaders
+}
 
 const plugins = () => {
   let base = [
+    new ImageMinimizerPlugin({
+      minimizerOptions: {
+        plugins: [
+          ['gifsicle', { interlaced: true }],
+          ['mozjpeg', { quality: 80 }],
+          ['pngquant', { quality: [0.5, 0.9] }],
+          [
+            'svgo',
+            {
+              plugins: extendDefaultPlugins([
+                {
+                  name: 'removeViewBox',
+                  active: false,
+                },
+                {
+                  name: 'addAttributesToSVGElement',
+                  params: {
+                    attributes: [{ xmlns: 'http://www.w3.org/2000/svg' }],
+                  },
+                },
+              ]),
+            },
+          ],
+        ],
+      },
+    }),
+    // new FontPreloadPlugin({
+    //   index: 'index.html',
+    //   extensions: ['woff', 'woff2', 'ttf', 'eot'],
+    //   crossorigin: true,
+    //   loadType: 'preload',
+    //   insertBefore: 'head > link:nth-child(1)',
+    // }),
+    new WorkboxPlugin.GenerateSW({
+      clientsClaim: true,
+      skipWaiting: true,
+      exclude: [/\.(?:png|jpg|jpeg|svg)$/],
+      runtimeCaching: [
+        {
+          urlPattern: /\.(?:png|jpg|jpeg|svg)$/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'images',
+            expiration: {
+              maxEntries: 10,
+            },
+          },
+        },
+      ],
+    }),
     new HTMLWebpackPlugin({
       template: path.resolve(__dirname, 'public/index.html'),
       minify: {
         collapseWhitespace: isProd,
       },
+      scriptLoading: 'defer',
     }),
     new CleanWebpackPlugin(),
     new CopyWebpackPlugin({
@@ -49,29 +104,29 @@ const plugins = () => {
     new MiniCssExtractPlugin({
       filename: filename('css'),
     }),
-  ];
+  ]
 
-  // if (isProd) {
-  //   base.push(new BundleAnalyzerPlugin());
-  // }
+  if (isProd) {
+    base.push(new BundleAnalyzerPlugin())
+  }
 
-  return base;
-};
+  return base
+}
 
-const babelOptions = (preset) => {
+const babelOptions = preset => {
   let opts = {
     presets: ['@babel/preset-env'],
     plugins: [
       '@babel/plugin-syntax-dynamic-import',
       '@babel/plugin-proposal-class-properties',
     ],
-  };
+  }
   if (preset) {
-    opts.presets.push(preset);
+    opts.presets.push(preset)
   }
 
-  return opts;
-};
+  return opts
+}
 
 const jsLoaders = () => {
   let loaders = [
@@ -79,13 +134,13 @@ const jsLoaders = () => {
       loader: 'babel-loader',
       options: babelOptions(),
     },
-  ];
+  ]
   if (isDev) {
-    loaders.push('eslint-loader');
+    loaders.push('eslint-loader')
   }
 
-  return loaders;
-};
+  return loaders
+}
 
 module.exports = {
   context: path.resolve(__dirname, 'src'),
@@ -109,6 +164,24 @@ module.exports = {
   optimization: {
     splitChunks: {
       chunks: 'all',
+      minSize: 20000,
+      minRemainingSize: 0,
+      minChunks: 1,
+      maxAsyncRequests: 30,
+      maxInitialRequests: 30,
+      enforceSizeThreshold: 50000,
+      cacheGroups: {
+        defaultVendors: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10,
+          reuseExistingChunk: true,
+        },
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true,
+        },
+      },
     },
     minimize: isProd,
     minimizer: [
@@ -158,8 +231,18 @@ module.exports = {
         },
       },
       {
-        test: /\.(png|jpg|svg|webp)$/,
+        test: /\.(png|jpg|webp)$/,
         use: ['file-loader'],
+      },
+      {
+        test: /\.svg$/,
+        use: {
+          loader: 'svg-url-loader',
+          options: {
+            encoding: 'base64',
+            iesafe: true,
+          },
+        },
       },
       {
         test: /\.(ttf|woff|woff2|eot)$/,
@@ -171,4 +254,4 @@ module.exports = {
       },
     ],
   },
-};
+}
